@@ -94,9 +94,8 @@
     </div>
 
     <script>
-        // --- BU BİLGİLERİ KENDİNİZE GÖRE DÜZENLEYİN ---
-        const contractAddress = "YOUR_DEPLOYED_CONTRACT_ADDRESS";
-        const providerUrl = "https://endpoints.omniatech.io/v1/matic/mumbai/public"; 
+        const contractAddress = "0x4eb0297409edfab76d08db836f5ca49088d7c4ad";
+        const providerUrl = "https://polygon-amoy.drpc.org"; 
         
         const contractABI = [
             "function tokenURI(uint256 tokenId) view returns (string)",
@@ -117,16 +116,13 @@
                 const provider = new ethers.providers.JsonRpcProvider(providerUrl);
                 const contract = new ethers.Contract(contractAddress, contractABI, provider);
 
-                // 1. Adım: Kontrattan metadata URL'sini al
-                const metadataUrl = await contract.tokenURI(1); // Token ID'miz her zaman 1
+                const metadataUrl = await contract.tokenURI(1);
                 console.log("Metadata URL:", metadataUrl);
 
-                // 2. Adım: O URL'den asıl metadata'yı çek
                 const metadataResponse = await fetch(metadataUrl);
                 const metadata = await metadataResponse.json();
                 console.log("Metadata:", metadata);
                 
-                // 3. Adım: Arayüzü güncelle
                 nftImageElem.src = metadata.image;
                 nftNameElem.innerText = metadata.name;
                 nftDescElem.innerText = metadata.description;
