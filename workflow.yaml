@@ -2,7 +2,7 @@ name: hourly-london-weather-nft-update-v2
 execution: sequential
 trigger:
   type: time-based
-  repeatEvery: "0 * * * *" 
+  repeatEvery: "*/5 * * * *" 
 
 actions:
   - name: GetLondonWeather
