@@ -5,6 +5,7 @@ const PORT = process.env.PORT || 3000;
 
 app.use(cors());
 
+
 function generateWeatherSVG(code) {
     const width = 500;
     const height = 500;
@@ -13,32 +14,30 @@ function generateWeatherSVG(code) {
     let weatherText = 'London';
 
     switch (true) {
-        case (code === 0): // Clear sky
-            backgroundColor = '#87CEEB';
-            elements = `<circle cx="${width * 0.5}" cy="${height * 0.4}" r="80" fill="#FFD700" />`;
+        case (code === 0): 
+            backgroundColor = '#87CEEB'; 
+            elements += `<circle cx="${width * 0.5}" cy="${height * 0.4}" r="80" fill="#FFD700" />`;
             weatherText = "Sunny London";
             break;
         
-        case (code >= 1 && code <= 3): 
-        case (code >= 45 && code <= 48): // Fog
-            backgroundColor = '#B0C4DE';
-            elements = `<circle cx="${width * 0.7}" cy="${height * 0.35}" r="70" fill="#F0E68C" />` +
-                       `<circle cx="${width * 0.3}" cy="${height * 0.4}" r="60" fill="white" opacity="0.9" />` +
-                       `<circle cx="${width * 0.45}" cy="${height * 0.45}" r="80" fill="white" opacity="0.9" />` +
-                       `<circle cx="${width * 0.6}" cy="${height * 0.4}" r="70" fill="white" opacity="0.9" />`;
+        case (code >= 1 && code <= 3) || (code >= 45 && code <= 48): 
+            backgroundColor = '#B0C4DE'; 
+            elements += `<circle cx="${width * 0.7}" cy="${height * 0.35}" r="70" fill="#F0E68C" />`;
+            elements += `<circle cx="${width * 0.3}" cy="${height * 0.4}" r="60" fill="white" opacity="0.9" />`;
+            elements += `<circle cx="${width * 0.45}" cy="${height * 0.45}" r="80" fill="white" opacity="0.9" />`;
+            elements += `<circle cx="${width * 0.6}" cy="${height * 0.4}" r="70" fill="white" opacity="0.9" />`;
             weatherText = "Cloudy London";
             break;
 
-        case (code >= 51 && code <= 67): // Drizzle, Rain
-        case (code >= 80 && code <= 82): // Rain showers
-            backgroundColor = '#778899';
-            elements = `<circle cx="${width * 0.3}" cy="${height * 0.3}" r="60" fill="#B0C4DE" />` +
-                       `<circle cx="${width * 0.45}" cy="${height * 0.35}" r="80" fill="#B0C4DE" />` +
-                       `<circle cx="${width * 0.6}" cy="${height * 0.3}" r="70" fill="#B0C4DE" />`;
-            for(let i=0; i<30; i++) {
+        case (code >= 51 && code <= 67) || (code >= 80 && code <= 82): 
+            backgroundColor = '#778899'; 
+            elements += `<circle cx="${width * 0.3}" cy="${height * 0.3}" r="60" fill="#B0C4DE" />`;
+            elements += `<circle cx="${width * 0.45}" cy="${height * 0.35}" r="80" fill="#B0C4DE" />`;
+            elements += `<circle cx="${width * 0.6}" cy="${height * 0.3}" r="70" fill="#B0C4DE" />`;
+            for(let i = 0; i < 30; i++) {
                 const x = Math.random() * width;
                 const y = Math.random() * (height - height * 0.4) + height * 0.4;
-                elements += `<line x1="${x}" y1="${y}" x2="${x+5}" y2="${y+15}" stroke="#4682B4" stroke-width="3" stroke-linecap="round" />`;
+                elements += `<line x1="${x}" y1="${y}" x2="${x + 5}" y2="${y + 15}" stroke="#4682B4" stroke-width="3" stroke-linecap="round" />`;
             }
             weatherText = "Rainy London";
             break;
@@ -47,7 +46,6 @@ function generateWeatherSVG(code) {
             weatherText = `London (${code})`;
             break;
     }
-
     
     return `
         <svg width="${width}" height="${height}" xmlns="http://www.w3.org/2000/svg" style="font-family: sans-serif;">
@@ -70,7 +68,7 @@ app.get('/api', (req, res) => {
             case 'clear': weatherCode = 0; break;
             case 'clouds': weatherCode = 3; break;
             case 'rain': weatherCode = 61; break;
-            case 'default': weatherCode = 999; break; // 'default' sorgusunu da ele alalım
+            case 'default': weatherCode = 999; break;
             default: weatherCode = 999; break;
         }
     } else {
