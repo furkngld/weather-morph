@@ -11,7 +11,7 @@ actions:
 
   - name: UpdateNFTOnChain
     type: call
-    chainID: 80001 
+    chainID: 80002 
     targetContract: "0x4eb0297409edfab76d08db836f5ca49088d7c4ad" 
     targetFunction: "updateTokenURI"
     targetParams:
