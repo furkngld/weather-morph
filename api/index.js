@@ -1,21 +1,26 @@
 const express = require('express');
+const cors = require('cors');
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+app.use(cors());
 
 function generateWeatherSVG(code) {
     const width = 500;
     const height = 500;
-    let backgroundColor = '#A9A9A9';
+    let backgroundColor = '#A9A9A9'; // Koyu gri (varsayılan)
     let elements = '';
     let weatherText = 'London';
 
     switch (true) {
-        case (code === 0):
+        case (code === 0): // Clear sky
             backgroundColor = '#87CEEB';
             elements = `<circle cx="${width * 0.5}" cy="${height * 0.4}" r="80" fill="#FFD700" />`;
             weatherText = "Sunny London";
             break;
-        case (code >= 1 && code <= 3) || (code >= 45 && code <= 48):
+        
+        case (code >= 1 && code <= 3): 
+        case (code >= 45 && code <= 48): // Fog
             backgroundColor = '#B0C4DE';
             elements = `<circle cx="${width * 0.7}" cy="${height * 0.35}" r="70" fill="#F0E68C" />` +
                        `<circle cx="${width * 0.3}" cy="${height * 0.4}" r="60" fill="white" opacity="0.9" />` +
@@ -23,7 +28,9 @@ function generateWeatherSVG(code) {
                        `<circle cx="${width * 0.6}" cy="${height * 0.4}" r="70" fill="white" opacity="0.9" />`;
             weatherText = "Cloudy London";
             break;
-        case (code >= 51 && code <= 67) || (code >= 80 && code <= 82):
+
+        case (code >= 51 && code <= 67): // Drizzle, Rain
+        case (code >= 80 && code <= 82): // Rain showers
             backgroundColor = '#778899';
             elements = `<circle cx="${width * 0.3}" cy="${height * 0.3}" r="60" fill="#B0C4DE" />` +
                        `<circle cx="${width * 0.45}" cy="${height * 0.35}" r="80" fill="#B0C4DE" />` +
@@ -35,10 +42,12 @@ function generateWeatherSVG(code) {
             }
             weatherText = "Rainy London";
             break;
+        
         default:
             weatherText = `London (${code})`;
             break;
     }
+
     
     return `
         <svg width="${width}" height="${height}" xmlns="http://www.w3.org/2000/svg" style="font-family: sans-serif;">
@@ -51,6 +60,7 @@ function generateWeatherSVG(code) {
     `;
 }
 
+
 app.get('/api', (req, res) => {
     const weatherQuery = req.query.weather || '999';
     let weatherCode;
@@ -60,6 +70,7 @@ app.get('/api', (req, res) => {
             case 'clear': weatherCode = 0; break;
             case 'clouds': weatherCode = 3; break;
             case 'rain': weatherCode = 61; break;
+            case 'default': weatherCode = 999; break; // 'default' sorgusunu da ele alalım
             default: weatherCode = 999; break;
         }
     } else {
