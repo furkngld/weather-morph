@@ -2,24 +2,20 @@ const express = require('express');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-
 function generateWeatherSVG(code) {
     const width = 500;
     const height = 500;
-    let backgroundColor = '#A9A9A9'; // Koyu gri (varsayılan)
+    let backgroundColor = '#A9A9A9';
     let elements = '';
     let weatherText = 'London';
 
-
     switch (true) {
-        case (code === 0): // Clear sky
+        case (code === 0):
             backgroundColor = '#87CEEB';
             elements = `<circle cx="${width * 0.5}" cy="${height * 0.4}" r="80" fill="#FFD700" />`;
             weatherText = "Sunny London";
             break;
-        
-        case (code >= 1 && code <= 3): // Mainly clear, partly cloudy, overcast
-        case (code >= 45 && code <= 48): // Fog
+        case (code >= 1 && code <= 3) || (code >= 45 && code <= 48):
             backgroundColor = '#B0C4DE';
             elements = `<circle cx="${width * 0.7}" cy="${height * 0.35}" r="70" fill="#F0E68C" />` +
                        `<circle cx="${width * 0.3}" cy="${height * 0.4}" r="60" fill="white" opacity="0.9" />` +
@@ -27,9 +23,7 @@ function generateWeatherSVG(code) {
                        `<circle cx="${width * 0.6}" cy="${height * 0.4}" r="70" fill="white" opacity="0.9" />`;
             weatherText = "Cloudy London";
             break;
-
-        case (code >= 51 && code <= 67): // Drizzle, Rain
-        case (code >= 80 && code <= 82): // Rain showers
+        case (code >= 51 && code <= 67) || (code >= 80 && code <= 82):
             backgroundColor = '#778899';
             elements = `<circle cx="${width * 0.3}" cy="${height * 0.3}" r="60" fill="#B0C4DE" />` +
                        `<circle cx="${width * 0.45}" cy="${height * 0.35}" r="80" fill="#B0C4DE" />` +
@@ -41,9 +35,8 @@ function generateWeatherSVG(code) {
             }
             weatherText = "Rainy London";
             break;
-        
         default:
-            weatherText = `London (${code})`; // Hata ayıklama için kodu da yazdırabiliriz
+            weatherText = `London (${code})`;
             break;
     }
     
@@ -58,16 +51,25 @@ function generateWeatherSVG(code) {
     `;
 }
 
-
 app.get('/api', (req, res) => {
-    const weatherCode = parseInt(req.query.weather, 10) || 999;
+    const weatherQuery = req.query.weather || '999';
+    let weatherCode;
+
+    if (isNaN(parseInt(weatherQuery, 10))) {
+        switch (weatherQuery.toLowerCase()) {
+            case 'clear': weatherCode = 0; break;
+            case 'clouds': weatherCode = 3; break;
+            case 'rain': weatherCode = 61; break;
+            default: weatherCode = 999; break;
+        }
+    } else {
+        weatherCode = parseInt(weatherQuery, 10);
+    }
     
     const svgImage = generateWeatherSVG(weatherCode);
-    
     const base64Image = Buffer.from(svgImage).toString('base64');
     const imageDataURI = `data:image/svg+xml;base64,${base64Image}`;
 
-    // Metadata'yı oluştur
     const metadata = {
         name: `London Weather NFT`,
         description: `An on-chain, dynamic representation of London's weather, updated hourly by Kwala. Current WMO code: ${weatherCode}`,
