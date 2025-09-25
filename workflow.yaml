@@ -1,25 +1,18 @@
-# workflow.yaml
 name: hourly-london-weather-nft-update-v2
 execution: sequential
 trigger:
   type: time-based
-  repeatEvery: "0 * * * *" # Her saat başı çalışır
+  repeatEvery: "0 * * * *" 
 
 actions:
-  # AKSİYON 1: Open-Meteo API'sinden Londra'nın hava durumu kodunu çek
-  # API anahtarı GEREKMEZ!
   - name: GetLondonWeather
     type: api
-    # Londra'nın enlem/boylamını ve anlık hava durumu kodunu istiyoruz.
     apiEndpoint: "https://api.open-meteo.com/v1/forecast?latitude=51.5072&longitude=-0.1276&current=weather_code&timezone=Europe/London"
 
-  # AKSİYON 2: Alınan kod ile Web3 akıllı kontratını güncelle
   - name: UpdateNFTOnChain
     type: call
-    chainID: 80001 # Polygon Mumbai
-    # Remix'te deploy ettikten sonra alacağın KENDİ KONTRAKT ADRESİNİ buraya yapıştır
+    chainID: 80001 
     targetContract: "YOUR_DEPLOYED_CONTRACT_ADDRESS" 
     targetFunction: "updateTokenURI"
-    # KENDİ VERCEL URL'Nİ buraya yapıştır
     targetParams:
-      - "https://YOUR_VERCEL_APP_URL/api?weather={{actions.GetLondonWeather.response.current.weather_code}}"
+      - "https://weather-morph.vercel.app/api?weather={{actions.GetLondonWeather.response.current.weather_code}}"
