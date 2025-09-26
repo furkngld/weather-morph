@@ -17,6 +17,15 @@
         #loading { font-size: 1.2em; }
         button { background-color: #007bff; color: white; border: none; padding: 12px 24px; font-size: 1em; border-radius: 8px; cursor: pointer; transition: background-color 0.3s ease; }
         button:hover { background-color: #0056b3; }
+        .attributes-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-top: 20px; }
+        .attribute-card { background: #333; padding: 12px; border-radius: 8px; text-align: left; }
+        .attribute-label { display: block; color: #888; font-size: 0.9em; }
+        .attribute-value { display: block; color: #fff; font-weight: bold; margin-top: 4px; }
+        .rarity.Legendary { color: #ff6b00; }
+        .rarity.Epic { color: #a335ee; }
+        .rarity.Rare { color: #0070dd; }
+        .rarity.Uncommon { color: #1eff00; }
+        .rarity.Common { color: #ffffff; }
     </style>
 </head>
 <body>
@@ -28,7 +37,25 @@
             <img id="nftImage" style="display: none;" alt="WeatherMorph NFT">
             <h2 id="nftName"></h2>
             <p id="nftDescription"></p>
-            <p id="nftAttribute"></p>
+            
+            <div id="attributes" class="attributes-grid" style="display: none;">
+                <div class="attribute-card">
+                    <span class="attribute-label">Weather:</span>
+                    <span class="attribute-value" id="weatherCondition"></span>
+                </div>
+                <div class="attribute-card">
+                    <span class="attribute-label">Rarity:</span>
+                    <span class="attribute-value rarity" id="rarity"></span>
+                </div>
+                <div class="attribute-card">
+                    <span class="attribute-label">Time:</span>
+                    <span class="attribute-value" id="timeOfDay"></span>
+                </div>
+                <div class="attribute-card">
+                    <span class="attribute-label">Season:</span>
+                    <span class="attribute-value" id="season"></span>
+                </div>
+            </div>
         </div>
         <button onclick="fetchNFTData()">Refresh Data</button>
         <p>Data is pulled directly from the Polygon Amoy testnet.</p>
@@ -47,7 +74,10 @@
 
         async function fetchNFTData() {
             try {
-                loadingElem.style.display = 'block'; nftImageElem.style.display = 'none';
+                loadingElem.style.display = 'block'; 
+                nftImageElem.style.display = 'none';
+                document.getElementById('attributes').style.display = 'none';
+                
                 const provider = new ethers.providers.JsonRpcProvider(providerUrl);
                 const contract = new ethers.Contract(contractAddress, contractABI, provider);
                 const metadataUrl = await contract.tokenURI(1);
@@ -57,13 +87,29 @@
                 nftImageElem.src = metadata.image;
                 nftNameElem.innerText = metadata.name;
                 nftDescElem.innerText = metadata.description;
-                const attribute = metadata.attributes[0];
-                nftAttrElem.innerText = `Attribute: ${attribute.trait_type} - ${attribute.value}`;
                 
-                loadingElem.style.display = 'none'; nftImageElem.style.display = 'block';
+                if (metadata.attributes) {
+                    const weatherAttr = metadata.attributes.find(a => a.trait_type === "Weather Condition");
+                    const rarityAttr = metadata.attributes.find(a => a.trait_type === "Rarity");
+                    const timeAttr = metadata.attributes.find(a => a.trait_type === "Time of Day");
+                    const seasonAttr = metadata.attributes.find(a => a.trait_type === "Season");
+                    
+                    document.getElementById('weatherCondition').innerText = weatherAttr?.value || 'Unknown';
+                    const rarityElem = document.getElementById('rarity');
+                    rarityElem.innerText = rarityAttr?.value || 'Unknown';
+                    rarityElem.className = `attribute-value rarity ${rarityAttr?.value || ''}`;
+                    document.getElementById('timeOfDay').innerText = timeAttr?.value || 'Unknown';
+                    document.getElementById('season').innerText = seasonAttr?.value || 'Unknown';
+                    
+                    document.getElementById('attributes').style.display = 'grid';
+                }
+                
+                loadingElem.style.display = 'none'; 
+                nftImageElem.style.display = 'block';
+                
             } catch (error) {
                 console.error("Failed to fetch NFT data:", error);
-                loadingElem.innerText = "Error loading NFT. Check console and make sure your Alchemy API Key is correct.";
+                loadingElem.innerText = "Error loading NFT. Please try again later.";
             }
         }
         window.onload = fetchNFTData;
